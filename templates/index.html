@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Old Car Price Prediction</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+</head>
+<body>
+    <div class="container-fluid">
+       <form method="POST" action="/get_prediction" id="form_id">
+        <h1 style="text-align:center"> Old Car Price Prediction</h1>
+        <div class="form-group">
+            <label>Car Name :</label>
+            <select name="car_name" class="form-control" id = car_name required>
+                <option value="" selected disabled>Please Select Car Name</option>
+                {% for name in car_name %}
+                <option value="{{name}}">{{name}}</option>
+                {%endfor%}
+            </select>
+        </div>
+
+        <div class=" form-group">
+            <label>Company Name :</label>
+            <input name="company" id="company" class="form-control" value="{{company}}" readonly>
+        </div>
+
+        <div class=" form-group">
+            <label>Fuel Type :</label>
+            <input name="fuel_type" id="fuel_type" class="form-control" value="{{fuel_type}}" readonly>
+        </div>
+
+        <div class=" form-group">
+            <label>Transmission :</label>
+            <input name="transmission" id="transmission" class="form-control" value="{{transmission}}" readonly>
+        </div>
+
+        <div class="form-group">
+            <label>Location :</label>
+            <select name="location" class="form-control" id = location required>
+                {% for location in location %}
+                <option value="{{location}}">{{location}}</option>
+                {%endfor%}
+            </select>
+        </div>
+
+         <div class="form-group">
+            <label>Car Manufactured Year :</label>
+            <select name="year" class="form-control" id = 'year' required>
+                <option value="" selected disabled>Please Select Car Manufactured Year</option>
+                {% for year in year %}
+                <option value="{{year}}">{{year}}</option>
+                {%endfor%}
+            </select>
+        </div>
+
+        <div class=" form-group">
+            <label>Kilometer_Driven :</label>
+            <input name="kilometer" id="kilometer" class="form-control" value="{{kilometer}}" type="number" required placeholder="Enter Value from 100 to 1000000" min="100" max="1000000">
+        </div>
+
+       <div class="form-group">
+            <label>Owner Type :</label>
+            <select name="owner" class="form-control" id = owner required>
+                {% for owner in owner %}
+                <option value="{{owner}}">{{owner}}</option>
+                {%endfor%}
+            </select>
+        </div>
+
+
+        <div class=" form-group">
+            <label>Mileage (in KM/L):</label>
+            <input name="mileage" id="mileage" class="form-control" value="{{mileage}}" required placeholder="Enter Value from 5 to 40" min="5" max="40" type="number">
+        </div>
+
+        <div class=" form-group">
+            <label>Engine (in CC):</label>
+            <input name="engine" id="engine" class="form-control" value="{{engine}}" readonly required>
+        </div>
+
+        <div class=" form-group">
+            <label>Brake Horse Power :</label>
+            <input name="power" id="power" class="form-control" value="{{power}}" readonly required>
+        </div>
+
+        <div class=" form-group">
+            <label>New Price :</label>
+            <input name="new_price" id="new_price" class="form-control" value="{{new_price}}" required>
+        </div>
+            <input name="prediction" id="prediction"  value="{{prediction}}" hidden >
+        <button type="submit" class="btn btn-primary">Predict Old Car Selling Price</button>
+       </form>
+    </div>
+</body>
+
+
+<script>
+    $(document).ready(function(){
+        $('#car_name').change(function(){
+            selected_car = $('#car_name').val()
+            $.ajax({
+                method : 'POST',
+                dataType : 'html',
+                data : {'data' : selected_car},
+                url : '/',
+                success : function(response){
+                    var company = $('<div/>').append(response).find('#company').val();
+                    var fuel_type = $('<div/>').append(response).find('#fuel_type').val();
+                    var transmission = $('<div/>').append(response).find('#transmission').val();
+                    var year = $('<div/>').append(response).find('#year').html();
+                    $('#company').val(company)
+                    $('#fuel_type').val(fuel_type)
+                    $('#transmission').val(transmission)
+                    $('#year').html(year)
+                    }
+            });
+        });
+        $('#year').change(function(){
+            selected_car = $('#car_name').val()
+            selected_year = $('#year').val()
+            $.ajax({
+                method : 'POST',
+                dataType : 'html',
+                data : {'selected_car':selected_car , 'selected_year': selected_year},
+                url : '/get_engine_detail',
+                success : function(response){
+                    var engine = $('<div/>').append(response).find('#engine').val()
+                    var power = $('<div/>').append(response).find('#power').val()
+                    $('#engine').val(engine)
+                    $('#power').val(power)
+                }
+            });
+       });
+       $('#form_id').submit(function(e){
+        e.preventDefault();
+        var url = $(this).attr('action');
+        $.ajax({
+              type :'POST',
+              dataType : 'HTML',
+              url : url,
+              data : $(this).serialize(),
+              success: function(response){
+                  var prediction = $('<div/>').append(response).find('#prediction').val();
+                  alert("Old Car Sale Price :" + prediction)
+              }
+    });
+    });
+
+
+    });
+</script>
